@@ -1,22 +1,33 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import MenuPositions from '../views/MenuPositions.vue'
+import Position from '../views/Position.vue'
+import NewPosition from '../views/NewPosition.vue'
+import Categories from '../views/Categories.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'MenuPositions',
+    component: MenuPositions
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/position/new',
+    name: 'NewPosition',
+    component: NewPosition
+  },
+  {
+    path: '/position/:id',
+    name: 'Position',
+    component: Position,
+    props: true
+  },
+  {
+    path: '/categories',
+    name: 'Categories',
+    component: Categories
   }
 ]
 

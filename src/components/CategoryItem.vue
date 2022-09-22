@@ -1,10 +1,10 @@
 <template>
 <div class="category">
   <b-dropdown
-    :text="selectedTag !== null ? selectedTag.value : name"
-    :class="{ 'category-name': !selectedTag }">
+    :text="dropdownText"
+    :variant="variant">
     <b-dropdown-item
-      @click="onClick(tag)"
+      @click="selectTag(tag)"
       :key="tag.id"
       v-for="tag in tags"
       :title="tag.value">
@@ -23,6 +23,13 @@
       @click="deleteCategory"
       title="Удалить">
       Удалить
+    </b-dropdown-item>
+    <b-dropdown-item
+      v-if="mode === 'choose'"
+      class="category__action"
+      @click="removeTag"
+      title="Убрать тег">
+      Убрать тег
     </b-dropdown-item>
   </b-dropdown>
 
@@ -52,7 +59,7 @@
       </b-form-tags>
     </b-form>
     <template #modal-footer="{ cancel }">
-      <b-button variant="danger" @click="cancel()">
+      <b-button variant="danger" @click="cancel">
         Отмена
       </b-button>
       <b-button variant="success" @click="saveEdit">
@@ -82,14 +89,15 @@ export default {
       type: Array,
       required: true
     },
-    mode: {
-      type: String, // choose, edit
-      required: true
+    selected: {
+      type: Number, // tagId
+      default: null
     }
   },
+  inject: ['mode'],
   data() {
     return {
-      selectedTag: null,
+      // mode: this.mode,
       modalEditShown: false,
       editData: {
         name: null,
@@ -104,10 +112,21 @@ export default {
       deleteConfirm: ''
     }
   },
+  computed: {
+    dropdownText() {
+      if (this.selected) {
+        const tag = this.tags.find(tag => tag.id === this.selected)
+        return tag.value
+      } else return this.name
+    },
+    variant() {
+      return this.selected ? 'info' : 'secondary'
+    }
+  },
   methods: {
-    onClick(tag) {
+    selectTag(tag) {
       if (this.mode === 'choose') {
-        this.selectedTag = tag
+        this.$emit('selectTag', { id: tag.id })
       } 
     },
     deleteCategory() {
@@ -184,6 +203,9 @@ export default {
         }).catch(err => {
           console.log(err)
         })
+    },
+    removeTag() {
+      this.$emit('removeTag')
     }
   },
 

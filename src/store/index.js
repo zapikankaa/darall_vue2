@@ -24,13 +24,26 @@ export default new Vuex.Store({
     pushToPositions(state, payload) {
       state.positions.push(payload.position)
     },
+    updatePosition(state, payload) {
+      const position = state.positions.find(item => {
+        return item.id === payload.id
+      })
+      if (position) {
+        position.name = payload.name
+        position.description = payload.description
+        position.ingredients = payload.ingredients
+        position.weight_g = payload.weight_g
+        position.volume_ml = payload.volume_ml
+        position.price_rub = payload.price_rub
+      }
+    },
     setCategories(state, payload) {
       state.categories = payload.categories
     }
   },
   actions: {
     getPositions(context) {
-      HTTP.get('positions')
+      return HTTP.get('positions')
         .then(response => {
           context.commit({
             type: 'setPositions',
@@ -39,20 +52,26 @@ export default new Vuex.Store({
         }) 
     },
     getPositionById(context, id) {
-      HTTP.get('positions/' + id)
+      return HTTP.get('positions/' + id)
         .then(response => { 
           context.commit({
             type: 'setCurrentPosition',
             currentPosition: response.data
           })
-         })
+        })
       
     },
     postNewPosition(context, formData) {
       return HTTP.post('position/new', formData)
     },
+    putPosition(constext, formData) {
+      return HTTP.put('positions/' + formData.id, formData)
+    },
+    deletePosition(context, id) {
+      return HTTP.delete('positions/' + id)
+    },
     getCategories(context) {
-      HTTP.get('categories')
+      return HTTP.get('categories')
         .then(response => {
           context.commit({
             type: 'setCategories',

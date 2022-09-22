@@ -64,11 +64,23 @@
       <b-form-group
         label="Категории"
         label-for="input-tags">
-        <b-form-tags
-          tag-pills
-          tag-variant="success"
-          id="input-tags"
-          v-model="formData.tags"></b-form-tags>
+        <category-item
+          v-for="cat in categories"
+          :key="cat.id"
+          class="category"
+          :id="cat.id"
+          :name="cat.name"
+          :description="cat.description"
+          :tags="cat.tags"
+          mode="choose"
+          :selected="cat.selected"
+          @selectTag="onSelectTag($event, cat)">
+        </category-item>
+        <b-button
+          v-if="formData.tags.length > 0"
+          @click="clearTags"
+          variant="danger">
+          Очистить категории</b-button>
       </b-form-group>
 
       <div class="success" :class="{ shown: dataSent }">Позиция добавлена!</div>
@@ -79,8 +91,13 @@
   </div>
 </template>
 <script>
+import CategoryItem from '../components/CategoryItem.vue'
+
 export default {
   name: 'NewPosition',
+  components: {
+    CategoryItem
+  },
   data() {
     return {
       formData: {
@@ -92,22 +109,34 @@ export default {
         price_rub: '',
         tags: []
       },
+      categories: [],
       dataSent: false
     }
   },
   methods: {
-    resetForm() {
-      this.formData.name = '',
-      this.formData.description = '',
-      this.formData.ingredients = '',
-      this.formData.weight_g = '',
-      this.formData.volume_ml = '',
-      this.formData.price_rub = '',
-      this.formData.tags = []
+    onSelectTag(e, category) {
+      this.formData.tags.push({ id: e.id })
+      category.selected = e.id
     },
-    async sendNewPosition(e) {
+    clearTags() {
+      this.formData.tags = []
+      this.categories = this.categories.map(cat => {
+        cat.selected = null
+        return cat
+      })
+    },
+    resetForm() {
+      this.formData.name = ''
+      this.formData.description = ''
+      this.formData.ingredients = ''
+      this.formData.weight_g = ''
+      this.formData.volume_ml = ''
+      this.formData.price_rub = ''
+      this.clearTags()
+    },
+    sendNewPosition(e) {
       e.preventDefault()
-      await this.$store.dispatch('postNewPosition', {
+      this.$store.dispatch('postNewPosition', {
         name: this.formData.name,
         description: this.formData.description,
         ingredients: this.formData.ingredients,
@@ -116,6 +145,7 @@ export default {
         price_rub: this.formData.price_rub,
         tags: this.formData.tags
       }).then((response) => {
+        console.log(response)
         this.$store.commit({
           type: 'pushToPositions',
           position: response.data
@@ -126,6 +156,19 @@ export default {
       })
 
     }
+  },
+  beforeMount() {
+    if (this.$store.state.categories.length > 0) {
+      this.categories = this.$store.state.categories
+    } else {
+      this.$store.dispatch('getCategories')
+        .then(() => this.categories = this.$store.state.categories)
+    }
+
+    this.categories = this.categories.map(cat => {
+      cat.selected = null
+      return cat
+    })
   }
 }
 </script>
@@ -170,5 +213,10 @@ export default {
 
 .success.shown {
   opacity: 1;
+}
+
+.category {
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 </style>

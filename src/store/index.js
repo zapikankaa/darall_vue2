@@ -25,16 +25,17 @@ export default new Vuex.Store({
       state.positions.push(payload.position)
     },
     updatePosition(state, payload) {
-      const position = state.positions.find(item => {
-        return item.id === payload.id
-      })
-      if (position) {
-        position.name = payload.name
-        position.description = payload.description
-        position.ingredients = payload.ingredients
-        position.weight_g = payload.weight_g
-        position.volume_ml = payload.volume_ml
-        position.price_rub = payload.price_rub
+      state.currentPosition = payload
+      if (state.positions.length > 0) {
+        const posIndex = state.positions.findIndex(pos => pos.id === payload.id)
+        state.positions[posIndex] = payload
+      }
+    },
+    deletePosition(state, payload) {
+      state.currentPosition = null
+      if (state.positions.length > 0) {
+        const posIndex = state.positions.findIndex(pos => pos.id === payload.id)
+        state.positions.splice(posIndex, 1)
       }
     },
     setCategories(state, payload) {
@@ -59,16 +60,34 @@ export default new Vuex.Store({
             currentPosition: response.data
           })
         })
-      
     },
     postNewPosition(context, formData) {
       return HTTP.post('position/new', formData)
+        .then(response => {
+          if (response.status === 200 && context.state.positions.length > 0) {
+            context.commit({
+              type: 'pushToPositions',
+              position: response.data
+            })
+          }
+          return response
+        })
     },
-    putPosition(constext, formData) {
+    putPosition(context, formData) {
       return HTTP.put('positions/' + formData.id, formData)
+        .then(response => {
+          if (response.status === 200) {
+            context.commit('updatePosition', response.data)
+          }
+          return response
+        })
     },
     deletePosition(context, id) {
       return HTTP.delete('positions/' + id)
+        .then(response => {
+          context.commit('deletePosition', { id: response.data.id })
+          return response
+        })
     },
     getCategories(context) {
       return HTTP.get('categories')

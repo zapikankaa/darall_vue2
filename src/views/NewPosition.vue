@@ -1,6 +1,6 @@
 <template>
   <div class="new-position">
-    <router-link class="back" to="/">Назад к списку позиций</router-link>
+    <router-link class="back" to="/">К списку позиций</router-link>
     <h1 class="app-container__heading">Новая позиция</h1>
     <b-form @submit="sendNewPosition" @reset="resetForm" class="new-position__form">
       <b-form-group
@@ -64,7 +64,7 @@
       <b-form-group
         label="Категории"
         label-for="input-tags">
-        <category-item
+        <!-- <category-item
           v-for="cat in categories"
           :key="cat.id"
           class="category"
@@ -75,7 +75,7 @@
           mode="choose"
           :selected="cat.selected"
           @selectTag="onSelectTag($event, cat)">
-        </category-item>
+        </category-item> -->
         <b-button
           v-if="formData.tags.length > 0"
           @click="clearTags"
@@ -91,12 +91,12 @@
   </div>
 </template>
 <script>
-import CategoryItem from '../components/CategoryItem.vue'
+// import CategoryItem from '../components/CategoryItem.vue'
 
 export default {
   name: 'NewPosition',
   components: {
-    CategoryItem
+    // CategoryItem
   },
   data() {
     return {
@@ -145,14 +145,11 @@ export default {
         price_rub: this.formData.price_rub,
         tags: this.formData.tags
       }).then((response) => {
-        console.log(response)
-        this.$store.commit({
-          type: 'pushToPositions',
-          position: response.data
-        })
-        this.resetForm()
-        this.dataSent = true
-        setTimeout(() => { this.dataSent = false }, 2000)
+        if (response.status === 200) {
+          this.resetForm()
+          this.dataSent = true
+          setTimeout(() => { this.dataSent = false }, 2000)
+        }
       })
 
     }

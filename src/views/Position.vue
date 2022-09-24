@@ -1,6 +1,6 @@
 <template>
   <div class="position">
-    <router-link to="/">Назад к списку позиций</router-link>
+    <router-link to="/">К списку позиций</router-link>
     <b-button variant="danger" @click="deletePosition">Удалить</b-button>
     <div class="group"
       v-b-tooltip.hover
@@ -144,7 +144,9 @@ export default {
       tags: []
     }
   },
+
   props: [ 'id' ],
+
   beforeMount() {
     if (this.$store.state.positions.length > 0) {
       this.$store.commit({
@@ -189,7 +191,12 @@ export default {
         if (value) this.$store.dispatch('deletePosition', this.id)
           .then(res => {
             if (res.status === 200) {
-              this.$router.push('/')
+              this.$bvModal.msgBoxOk('Позиция удалена! Возвращаемся к списку...')
+              setTimeout(() => {
+                this.$router.push('/')
+              }, 2000)
+            } else {
+              // показать что что-то пошло не так
             }
           })
       })
@@ -202,10 +209,10 @@ export default {
       const removingTag = this.tags.find(tag => tag.categoryId === e.tag.categoryId)
       if (removingTag) tagsData.removed = { id: removingTag.id }
 
-      this.$store.dispatch('putPosition', {
+      this.sendUpdate({
         id: this.id,
         tags: tagsData
-      }).then((res) => console.log(res))      
+      })    
     },
     onRemoveTag(e) {
       const removingTag = this.tags.find(tag => tag.categoryId === e.categoryId)
@@ -214,64 +221,55 @@ export default {
         removed: { id: removingTag.id }
       }
 
-      this.$store.dispatch('putPosition', {
+      this.sendUpdate({
         id: this.id,
         tags: tagsData
-      }).then((res) => console.log(res))
+      })
+    },
+    sendUpdate(data) {
+      this.$store.dispatch('putPosition', data)
+        .then(response => {
+          if (response.status === 200)
+            this.getPositionData()
+        })
     }
   },
   watch: {
     mode: function(newVal, oldVal) {
+      if (newVal !== 'show') return
+
+      const formData = {
+        id: this.id,
+        name: null,
+        description: null,
+        ingredients: null,
+        weight_g: null,
+        volume_ml: null,
+        price_rub: null
+      }
+
       switch(oldVal) {
         case 'edit name':
-          this.$store.dispatch('putPosition', {
-            id: this.id,
-            name: this.name
-          }).then(res => {
-            console.log(res)
-          })
+          formData.name = this.name
           break
         case 'edit description':
-          this.$store.dispatch('putPosition', {
-            id: this.id,
-            description: this.description
-          }).then(res => {
-            console.log(res)
-          })
+          formData.description = this.description
           break
-        case 'edit ingrediends':
-          this.$store.dispatch('putPosition', {
-            id: this.id,
-            ingredients: this.ingredients
-          }).then(res => {
-            console.log(res)
-          })
+        case 'edit ingredients':
+          formData.ingredients = this.ingredients
           break
         case 'edit weight':
-          this.$store.dispatch('putPosition', {
-            id: this.id,
-            weight_g: this.weight_g
-          }).then(res => {
-            console.log(res)
-          })
+          formData.weight_g = this.weight_g
           break
         case 'edit volume':
-          this.$store.dispatch('putPosition', {
-            id: this.id,
-            volume_ml: this.volume_ml
-          }).then(res => {
-            console.log(res)
-          })
+          formData.volume_ml = this.volume_ml
           break
         case 'edit price':
-          this.$store.dispatch('putPosition', {
-            id: this.id,
-            price_rub: this.price_rub
-          }).then(res => {
-            console.log(res)
-          })
+          formData.price_rub = this.price_rub
           break
       }
+
+      this.sendUpdate(formData)
     }
   }
 }

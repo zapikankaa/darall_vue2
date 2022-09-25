@@ -2,16 +2,9 @@
   <div class="categories">
     <router-link class="back" to="/">Назад к списку позиций</router-link>
     <h1 class="app-container__heading">Категории</h1>
-    <category-item
-      v-for="item in categories"
-      :key="item.id"
-      class="category__item"
-      :id="item.id"
-      :name="item.name"
-      :description="item.description"
-      :tags="item.tags"
-      mode="edit">
-    </category-item>
+    <categories-list
+      class="categories__list">
+    </categories-list>
     <b-button class="new-button" :variant="showForm ? 'danger' : 'success'" @click="showForm = !showForm">{{ showForm ? 'Закрыть форму' : 'Новая категория' }}</b-button>
     <b-form v-if="showForm" class="new-form">
       <b-form-input
@@ -29,12 +22,17 @@
   </div>
 </template>
 <script>
-import CategoryItem from '../components/CategoryItem.vue'
+import CategoriesList from '../components/CategoriesList.vue'
 
 export default {
   name: 'Categories',
   components: {
-    CategoryItem
+    CategoriesList
+  },
+  provide() {
+    return {
+      mode: 'edit'
+    }
   },
   data() {
     return {
@@ -46,26 +44,17 @@ export default {
       }
     }
   },
-  computed: {
-    categories() {
-      return this.$store.state.categories
-    }
-  },
-  created() {
-    if (this.$store.state.categories.length === 0) {
-      this.$store.dispatch('getCategories')
-    }
-  },
   methods: {
-    async sendNewCategory() {
-      await this.$store.dispatch('postNewCategory', {
+    sendNewCategory() {
+      this.$store.dispatch('postNewCategory', {
         name: this.newCategory.name,
         description: this.newCategory.description,
         tags: this.newCategory.tags
-      }).then((response) => {
-        console.log(response.data)
-        this.showModalOk()
-        this.clearForm()
+      }).then(response => {
+        if (response.status === 200) {
+          this.showModalOk()
+          this.clearForm()
+        }
       })
     },
     clearForm() {
@@ -86,6 +75,10 @@ export default {
 }
 </script>
 <style scoped>
+.categories__list {
+  margin-bottom: 30px;
+}
+
 .categories__new {
   margin-bottom: 30px;
 }
@@ -100,10 +93,5 @@ export default {
 
 .new-form * {
   margin-bottom: 10px;
-}
-
-.category__item {
-  margin-right: 10px;
-  margin-bottom: 15px;
 }
 </style>

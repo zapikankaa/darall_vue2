@@ -10,8 +10,9 @@
       :tags="cat.tags"
       :selected="cat.selected"
       @selectTag="onSelectTag($event, cat)"
-      @removeTag="onRemoveTag(cat.id)">
-    </category-item>
+      @removeTag="onRemoveTag(cat.id)"
+      @updateCategory="onUpdateCategory"
+    ></category-item>
   </div>
 </template>
 
@@ -33,16 +34,7 @@ export default {
   },
   data() {
     return {
-      
-    }
-  },
-  computed: {
-    categories() {
-      return this.$store.state.categories.map(cat => {
-        const selectedTag = this.selectedTags.find(tag => tag.categoryId === cat.id)
-        cat.selected = selectedTag?.id
-        return cat
-      })
+      categories: []
     }
   },
   methods: {
@@ -52,11 +44,26 @@ export default {
     },
     onRemoveTag(categoryId) {
       this.$emit('removeTag', { categoryId: categoryId })
+    },
+    onUpdateCategory() {
+      this.updateCategories()
+    },
+    updateCategories() {
+      this.categories = this.$store.state.categories.map(cat => {
+        const selectedTag = this.selectedTags.find(tag => tag.categoryId === cat.id)
+        cat.selected = selectedTag?.id
+        return cat
+      })
     }
   },
   beforeMount() {
     if (this.$store.state.categories.length === 0) {
       this.$store.dispatch('getCategories')
+        .then(response => {
+          if (response.status === 200) {
+            this.updateCategories()
+          }
+        })
     }
   }
 }

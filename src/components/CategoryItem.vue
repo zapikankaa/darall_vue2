@@ -94,10 +94,11 @@ export default {
       default: null
     }
   },
-  inject: ['mode'],
+
+  inject: ['mode'], // choose, edit
+
   data() {
     return {
-      // mode: this.mode,
       modalEditShown: false,
       editData: {
         name: null,
@@ -128,6 +129,9 @@ export default {
       if (this.mode === 'choose') {
         this.$emit('selectTag', { id: tag.id })
       } 
+    },
+    removeTag() {
+      this.$emit('removeTag')
     },
     deleteCategory() {
       this.$bvModal.msgBoxConfirm('Удалить категорию?', {
@@ -197,15 +201,13 @@ export default {
       this.$store.dispatch('putCategory', formData)
         .then(response => {
           if (response.status === 200) {
+            this.$emit('updateCategory')
             this.showModalOk('Категория успешно обновлена')
             this.modalEditShown = false
           }
         }).catch(err => {
           console.log(err)
         })
-    },
-    removeTag() {
-      this.$emit('removeTag')
     }
   },
 

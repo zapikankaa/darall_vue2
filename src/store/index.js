@@ -40,25 +40,42 @@ export default new Vuex.Store({
     },
     setCategories(state, payload) {
       state.categories = payload.categories
+    },
+    pushToCategories(state, payload) {
+      state.categories.push(payload.category)
+    },
+    updateCategory(state, payload) {
+      const catIndex = state.categories.findIndex(cat => cat.id === payload.category.id)
+      state.categories[catIndex] = payload.category
+    },
+    deleteCategory(state, payload) {
+      const catIndex = state.categories.findIndex(cat => cat.id === payload.id)
+      state.categories.splice(catIndex, 1)
     }
   },
   actions: {
     getPositions(context) {
       return HTTP.get('positions')
         .then(response => {
-          context.commit({
-            type: 'setPositions',
-            positions: response.data
-          })
+          if (response.status === 200) {
+            context.commit({
+              type: 'setPositions',
+              positions: response.data
+            })
+          }
+          return response
         }) 
     },
     getPositionById(context, id) {
       return HTTP.get('positions/' + id)
-        .then(response => { 
-          context.commit({
-            type: 'setCurrentPosition',
-            currentPosition: response.data
-          })
+        .then(response => {
+          if (response.status === 200) {
+            context.commit({
+              type: 'setCurrentPosition',
+              currentPosition: response.data
+            })
+          }
+          return response
         })
     },
     postNewPosition(context, formData) {
@@ -85,27 +102,59 @@ export default new Vuex.Store({
     deletePosition(context, id) {
       return HTTP.delete('positions/' + id)
         .then(response => {
-          context.commit('deletePosition', { id: response.data.id })
+          if (response.status === 200) {
+            context.commit('deletePosition', { id: response.data.id })
+          }
           return response
         })
     },
     getCategories(context) {
       return HTTP.get('categories')
         .then(response => {
-          context.commit({
-            type: 'setCategories',
-            categories: response.data
-          })
+          if (response.status === 200) {
+            context.commit({
+              type: 'setCategories',
+              categories: response.data
+            })
+          }
+          return response
         }) 
     },
     postNewCategory(context, formData) {
       return HTTP.post('category/new', formData)
+        .then(response => {
+          console.log(response)
+          if (response.status === 200) {
+            context.commit({
+              type: 'pushToCategories',
+              category: response.data
+            })
+          }
+          return response
+        })
     },
     putCategory(context, formData) {
       return HTTP.put('category/' + formData.id, formData)
+        .then(response => {
+          if (response.status === 200) {
+            context.commit({
+              type: 'updateCategory',
+              category: response.data
+            })
+          }
+          return response
+        })
     },
     deleteCategory(context, id) {
       return HTTP.delete('category/' + id)
+        .then(response => {
+          if (response.status === 200) {
+            context.commit({
+              type: 'deleteCategory',
+              id: id
+            })
+          }
+        })
     }
   }
 })

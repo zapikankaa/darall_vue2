@@ -1,7 +1,9 @@
 <template>
   <div class="position">
-    <router-link to="/">К списку позиций</router-link>
-    <b-button variant="danger" @click="deletePosition">Удалить</b-button>
+    <div class="position__top">
+      <router-link to="/">К списку позиций</router-link>
+      <b-button variant="danger" @click="deletePosition">Удалить</b-button>
+    </div>
     <div class="group"
       v-b-tooltip.hover
       title="Нажмите, чтобы изменить"
@@ -156,7 +158,9 @@ export default {
       this.getPositionData()
     } else {
       this.$store.dispatch('getPositionById', this.id)
-        .then(() => this.getPositionData())
+        .then((response) => {
+          if (response.status === 200) this.getPositionData()
+        })
     }
   },
   beforeDestroy() {
@@ -283,6 +287,11 @@ p, h4 {
   text-align: left;
   max-width: 600px;
   margin: 0 auto;
+}
+
+.position__top {
+  display: flex;
+  justify-content: space-between;
 }
 
 .position__header {

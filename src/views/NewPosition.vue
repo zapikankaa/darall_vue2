@@ -64,18 +64,11 @@
       <b-form-group
         label="Категории"
         label-for="input-tags">
-        <!-- <category-item
-          v-for="cat in categories"
-          :key="cat.id"
-          class="category"
-          :id="cat.id"
-          :name="cat.name"
-          :description="cat.description"
-          :tags="cat.tags"
-          mode="choose"
-          :selected="cat.selected"
-          @selectTag="onSelectTag($event, cat)">
-        </category-item> -->
+        <categories-list
+          :selectedTags="formData.tags"
+          @selectTag="onSelectTag($event)"
+          @removeTag="onRemoveTag($event)">
+        </categories-list>
         <b-button
           v-if="formData.tags.length > 0"
           @click="clearTags"
@@ -91,12 +84,17 @@
   </div>
 </template>
 <script>
-// import CategoryItem from '../components/CategoryItem.vue'
+import CategoriesList from '../components/CategoriesList.vue'
 
 export default {
   name: 'NewPosition',
   components: {
-    // CategoryItem
+    CategoriesList
+  },
+  provide() {
+    return {
+      mode: 'choose'
+    }
   },
   data() {
     return {
@@ -109,21 +107,23 @@ export default {
         price_rub: '',
         tags: []
       },
-      categories: [],
       dataSent: false
     }
   },
   methods: {
-    onSelectTag(e, category) {
-      this.formData.tags.push({ id: e.id })
-      category.selected = e.id
+    onSelectTag(e) {
+      // проверяем и, при необходимости, удаляем выбранный ранее тег той же категории
+      const rmTagIndex = this.formData.tags.findIndex(tag => tag.categoryId === e.tag.categoryId)
+      if (rmTagIndex >= 0) this.formData.tags.splice(rmTagIndex, 1, e.tag)
+      // либо просто добавляем тег в список
+      else this.formData.tags.push(e.tag)
+    },
+    onRemoveTag(e) {
+      const rmTagIndex = this.formData.tags.findIndex(tag => tag.categoryId === e.categoryId)
+      this.formData.tags.splice(rmTagIndex, 1)
     },
     clearTags() {
       this.formData.tags = []
-      this.categories = this.categories.map(cat => {
-        cat.selected = null
-        return cat
-      })
     },
     resetForm() {
       this.formData.name = ''
@@ -143,29 +143,16 @@ export default {
         weight_g: this.formData.weight_g,
         volume_ml: this.formData.volume_ml,
         price_rub: this.formData.price_rub,
-        tags: this.formData.tags
+        tags: this.formData.tags.map(tag => { return { id: tag.id } })
       }).then((response) => {
         if (response.status === 200) {
-          this.resetForm()
           this.dataSent = true
           setTimeout(() => { this.dataSent = false }, 2000)
+          this.resetForm()
         }
       })
 
     }
-  },
-  beforeMount() {
-    if (this.$store.state.categories.length > 0) {
-      this.categories = this.$store.state.categories
-    } else {
-      this.$store.dispatch('getCategories')
-        .then(() => this.categories = this.$store.state.categories)
-    }
-
-    this.categories = this.categories.map(cat => {
-      cat.selected = null
-      return cat
-    })
   }
 }
 </script>

@@ -16,14 +16,15 @@
   text-align: center;
   color: #2c3e50;
   font-family: 'Source Sans Pro', sans-serif;
+  background-color: whitesmoke;
 }
 
 .app-container {
-  max-width: 1200px;
+  max-width: 980px;
   min-height: 100vh;
   margin: 0 auto;
   padding: 15px;
-  background-color: whitesmoke;
+  /* background-color: whitesmoke; */
 }
 
 .app-container__heading {
@@ -34,7 +35,7 @@
 .back {
   text-align: left;
   display: block;
-  max-width: 600px;
+  width: 100%;
   margin: 0 auto;
 }
 

@@ -5,20 +5,27 @@
     <categories-list
       class="categories__list">
     </categories-list>
-    <b-button class="new-button" :variant="showForm ? 'danger' : 'success'" @click="showForm = !showForm">{{ showForm ? 'Закрыть форму' : 'Новая категория' }}</b-button>
-    <b-form v-if="showForm" class="new-form">
-      <b-form-input
-        placeholder="Название категории"
-        v-model="newCategory.name"></b-form-input>
-      <b-form-input
-        placeholder="Описание категории"
-        v-model="newCategory.description"></b-form-input>
-      <b-form-tags
-        placeholder="Введите значения категории через запятую"
-        separator=","
-        v-model="newCategory.tags"></b-form-tags>
-        <b-button @click="sendNewCategory">Создать</b-button>
-    </b-form>
+    <div class="categories__new">
+      <b-button class="new-button" :variant="showForm ? 'danger' : 'success'" @click="showForm = !showForm">{{ showForm ? 'Закрыть форму' : 'Новая категория' }}</b-button>
+      <b-form v-if="showForm" @submit.prevent="sendNewCategory" class="new-form">
+        <b-form-input
+          placeholder="Название категории"
+          v-model="newCategory.name"
+          required></b-form-input>
+        <b-form-input
+          placeholder="Описание категории"
+          v-model="newCategory.description"></b-form-input>
+        <b-form-tags
+          placeholder="Введите значения категории через запятую"
+          separator=","
+          :input-attrs="{ 'aria-describedby': 'tags-validation-help' }"
+          v-model="newCategory.tags">
+        </b-form-tags>
+        <p>Минимум 2 тега (значения)</p>
+        
+        <b-button variant="success" type="submit">Создать</b-button>
+      </b-form>
+    </div>
   </div>
 </template>
 <script>
@@ -46,16 +53,17 @@ export default {
   },
   methods: {
     sendNewCategory() {
-      this.$store.dispatch('postNewCategory', {
-        name: this.newCategory.name,
-        description: this.newCategory.description,
-        tags: this.newCategory.tags
-      }).then(response => {
-        if (response.status === 200) {
-          this.showModalOk()
-          this.clearForm()
-        }
-      })
+      if (this.newCategory.tags.length >= 2) 
+        this.$store.dispatch('postNewCategory', {
+          name: this.newCategory.name,
+          description: this.newCategory.description,
+          tags: this.newCategory.tags
+        }).then(response => {
+          if (response.status === 200) {
+            this.showModalOk()
+            this.clearForm()
+          }
+        })
     },
     clearForm() {
       this.newCategory.name = ''
@@ -80,7 +88,9 @@ export default {
 }
 
 .categories__new {
-  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .new-button {
@@ -88,10 +98,15 @@ export default {
 }
 
 .new-form {
-  max-width: 600px;
+  max-width: 450px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.new-form * {
+.new-form *:not(:nth-child(3)) {
   margin-bottom: 10px;
 }
+
 </style>

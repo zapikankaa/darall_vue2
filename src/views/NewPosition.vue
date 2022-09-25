@@ -159,11 +159,12 @@ export default {
 <style scoped>
 
 .new-position {
+  max-width: 600px;
+  margin: 0 auto;
   padding-bottom: 60px;
 }
 
 .new-position__form {
-  max-width: 600px;
   margin: 0 auto;
   text-align: left;
 }

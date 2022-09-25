@@ -78,6 +78,12 @@ export default {
 </script>
 
 <style scoped>
+.categories-list {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
 .categories-list__item {
   margin-right: 5px;
   margin-bottom: 5px;

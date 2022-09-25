@@ -14,6 +14,30 @@ export default new Vuex.Store({
     categories: [],
     currentPosition: null
   },
+  getters: {
+    filteredPositions: state => filters => {
+      return state.positions.filter(pos => {
+        let include = true
+
+        for (let filterTag of filters) {
+          const t = pos.tags.find(tag => {
+            return tag.id === filterTag.id
+          })
+
+          if (!t) {
+            include = false
+            break
+          }
+        }
+
+        return include
+
+        // return pos.tags.find(tag => {
+        //   return filters.find(filterTag => filterTag.id === tag.id)
+        // })
+      })
+    }
+  },
   mutations: {
     setPositions(state, payload) {
       state.positions = payload.positions
@@ -123,7 +147,6 @@ export default new Vuex.Store({
     postNewCategory(context, formData) {
       return HTTP.post('category/new', formData)
         .then(response => {
-          console.log(response)
           if (response.status === 200) {
             context.commit({
               type: 'pushToCategories',

@@ -64,6 +64,14 @@ export default {
             this.updateCategories()
           }
         })
+    } else this.updateCategories()
+  },
+  watch: {
+    'selectedTags': function() {
+      this.updateCategories()
+    },
+    '$store.state.categories': function() {
+      this.updateCategories()
     }
   }
 }

@@ -44,6 +44,9 @@ export default {
 </script>
 
 <style scoped>
+.positions {
+  padding-bottom: 150px;
+}
 .toolbar {
   margin-bottom: 15px;
   padding: 0 15px;

@@ -119,6 +119,9 @@
       </categories-list>
     </div>
 
+    <b-modal id="modal-delete" title="Позиция удалена" :hide-footer="true">
+      <p>Возвращаемся к списку...</p>
+    </b-modal>
   </div>
 </template>
 <script>
@@ -195,7 +198,7 @@ export default {
         if (value) this.$store.dispatch('deletePosition', this.id)
           .then(res => {
             if (res.status === 200) {
-              this.$bvModal.msgBoxOk('Позиция удалена! Возвращаемся к списку...')
+              this.$bvModal.show('modal-delete')
               setTimeout(() => {
                 this.$router.push('/')
               }, 2000)

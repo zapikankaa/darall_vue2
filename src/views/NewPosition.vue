@@ -2,7 +2,7 @@
   <div class="new-position">
     <router-link class="back" to="/">К списку позиций</router-link>
     <h1 class="app-container__heading">Новая позиция</h1>
-    <b-form @submit="sendNewPosition" @reset="resetForm" class="new-position__form">
+    <b-form @submit="onSubmit" @reset="resetForm" class="new-position__form">
       <b-form-group
         label="Наименование*"
         label-for="input-name">
@@ -62,6 +62,24 @@
       </b-form-group>
 
       <b-form-group
+        label="Фото"
+        label-for="input-picture">
+        <b-form-file
+          id="input-picture"
+          v-model="formData.picture"
+          accept=".jpeg,.jpg,.png"
+          placeholder="Выберите файл или перетащите его в эту зону"
+          plain></b-form-file>
+          <b-button
+            class="delete-picture"
+            v-if="formData.picture"
+            @click="formData.picture = null"
+            variant="danger">
+            Удалить выбранный файл
+          </b-button>
+      </b-form-group>
+
+      <b-form-group
         label="Категории"
         label-for="input-tags">
         <categories-list
@@ -105,6 +123,7 @@ export default {
         weight_g: '',
         volume_ml: '',
         price_rub: '',
+        picture: null,
         tags: []
       },
       dataSent: false
@@ -132,19 +151,27 @@ export default {
       this.formData.weight_g = ''
       this.formData.volume_ml = ''
       this.formData.price_rub = ''
+      this.formData.picture = null
       this.clearTags()
     },
-    sendNewPosition(e) {
+    onSubmit(e) {
       e.preventDefault()
-      this.$store.dispatch('postNewPosition', {
-        name: this.formData.name,
-        description: this.formData.description,
-        ingredients: this.formData.ingredients,
-        weight_g: this.formData.weight_g,
-        volume_ml: this.formData.volume_ml,
-        price_rub: this.formData.price_rub,
-        tags: this.formData.tags.map(tag => { return { id: tag.id } })
-      }).then((response) => {
+      const formData = new FormData()
+      formData.append('name', this.formData.name)
+      formData.append('description', this.formData.description)
+      formData.append('ingredients', this.formData.ingredients)
+      formData.append('weight_g', this.formData.weight_g)
+      formData.append('volume_ml', this.formData.volume_ml)
+      formData.append('price_rub', this.formData.price_rub)
+      formData.append('tags',
+        JSON.stringify( this.formData.tags.map(tag => { return { id: tag.id } })) )
+      if (this.formData.picture) formData.append('picture', this.formData.picture)
+      else formData.append('picture', null)
+
+      this.sendNewPosition(formData)
+    },
+    sendNewPosition(formData) {
+      this.$store.dispatch('postNewPosition', formData).then((response) => {
         if (response.status === 200) {
           this.dataSent = true
           setTimeout(() => { this.dataSent = false }, 2000)
@@ -203,5 +230,9 @@ export default {
 .category {
   margin-right: 5px;
   margin-bottom: 5px;
+}
+
+.delete-picture {
+  margin-top: 10px;
 }
 </style>
